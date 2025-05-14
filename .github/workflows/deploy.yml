@@ -23,10 +23,10 @@ jobs:
       #     echo "Attempting to connect to port 22 on ${{ secrets.EC2_HOST }}..."
       #     nc -zv ${{ secrets.EC2_HOST }} 22
 
-      # - name: Add EC2 to known hosts
-      #   run: |
-      #     mkdir -p ~/.ssh
-      #     ssh-keyscan ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+      - name: Add EC2 to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
       - name: Create environment files locally
         run: |
