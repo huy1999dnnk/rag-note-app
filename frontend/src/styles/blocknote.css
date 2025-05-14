@@ -1,0 +1,19 @@
+.blocknote-full-height {
+  height: 100% !important;
+}
+
+.blocknote-full-height .bn-container {
+  height: 100% !important;
+}
+.blocknote-full-height .bn-container .bn-editor {
+  min-height: 100% !important;
+}
+
+.blocknote-full-height .bn-container div:nth-child(2) {
+  max-height: 500px !important;
+}
+
+/* This flips the menu when it would overflow the bottom of the viewport */
+.blocknote-full-height .bn-container div:nth-child(2)[style*='top:'] {
+  position: fixed !important;
+}

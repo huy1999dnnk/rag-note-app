@@ -1,0 +1,8 @@
+/* src/styles/tree-node.css */
+.tree-node:hover .tree-node-actions {
+  visibility: visible;
+}
+
+.tree-node-actions {
+  visibility: hidden;
+}

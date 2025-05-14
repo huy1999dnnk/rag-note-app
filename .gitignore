@@ -1,0 +1,79 @@
+
+
+
+# Frontend specific (React)
+frontend/node_modules/
+frontend/.pnp/
+frontend/.pnp.js
+frontend/coverage/
+frontend/build/
+frontend/dist/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.next/
+frontend/out/
+frontend/.vercel/
+frontend/.turbo
+frontend/.env.development
+frontend/.env.production
+
+# Backend specific (Python/FastAPI)
+backend/**/__pycache__/
+backend/*.py[cod]
+backend/*$py.class
+backend/*.so
+backend/.Python
+backend/build/
+backend/develop-eggs/
+backend/dist/
+backend/downloads/
+backend/eggs/
+backend/.eggs/
+backend/lib/
+backend/lib64/
+backend/parts/
+backend/sdist/
+backend/var/
+backend/wheels/
+backend/*.egg-info/
+backend/.installed.cfg
+backend/*.egg
+backend/.env
+backend/.venv
+backend/env/
+backend/venv/
+backend/ENV/
+backend/env.bak/
+backend/venv.bak/
+backend/.python-version
+backend/celerybeat-schedule
+backend/celerybeat.pid
+
+# Docker
+.docker/data/
+docker-compose.override.yml
+
+# Database
+*.sqlite3
+*.db
+pgdata/
+
+# Logs
+logs/
+*.log
+
+# AWS
+.aws/
+
+# ML/AI models and datasets
+*.h5
+*.pkl
+models/
+datasets/
+vectors/
+embeddings/

@@ -1,0 +1,77 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    dns:
+      - 8.8.8.8 # Google's public DNS
+    container_name: fastapi-app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    networks:
+      - backend
+    volumes:
+      - .:/app # Mount the app directory to the container for live updates
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload # Enable hot-reloading
+
+  celery_worker:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: celery-worker
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_BUCKET_NAME=${AWS_BUCKET_NAME}
+    depends_on:
+      - app
+      - db
+      - redis
+    volumes:
+      - .:/app
+    command: celery -A app.worker worker --loglevel=info
+    networks:
+      - backend
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    command: [
+        "redis-server",
+        "--appendonly yes",
+        "--requirepass",
+        "${REDIS_PASSWORD}",
+      ] # Enforces Redis password
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend
+
+networks:
+  backend:
+    name: task-management-network
+
+volumes:
+  postgres_data:
+  redis_data:
