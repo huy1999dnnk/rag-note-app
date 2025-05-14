@@ -68,6 +68,21 @@ jobs:
             
             # Make app.sh executable
             chmod +x app.sh
+
+             # Set up SSL certificates
+            echo "Setting up SSL certificates..."
+            
+            # For domain name (replace with your actual domain)
+            # sudo apt update
+            # sudo apt install -y certbot python3-certbot-nginx
+            # sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com --non-interactive --agree-tos -m your-email@example.com
+            
+            # For self-signed certificate (using IP address)
+            sudo mkdir -p /etc/ssl/private /etc/ssl/certs
+            sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+              -keyout /etc/ssl/private/nginx-selfsigned.key \
+              -out /etc/ssl/certs/nginx-selfsigned.crt \
+              -subj "/CN=${{ secrets.EC2_HOST }}"
             
             # Stop any running containers
             ./app.sh down
