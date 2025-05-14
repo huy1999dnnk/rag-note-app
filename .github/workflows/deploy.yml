@@ -1,0 +1,84 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+
+      - name: Add EC2 to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create environment files locally
+        run: |
+          # Create backend .env file
+          cat > backend/.env << EOF
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          POSTGRES_HOST=db
+          POSTGRES_PORT=5432
+
+          REDIS_HOST=redis
+          REDIS_PORT=6379
+          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+          REDIS_DB=0
+
+          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION=${{ secrets.AWS_REGION }}
+          AWS_BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }}
+
+          ALLOWED_ORIGINS=${{ secrets.ALLOWED_ORIGINS }}
+          EOF
+
+          # Create frontend .env.production file
+          cat > frontend/.env.production << EOF
+          VITE_API_BASE_URL=""
+          VITE_API_V1_URL="/api/v1"
+          VITE_AUTH_API_URL="/api/auth"
+          VITE_GOOGLE_AUTH_ENDPOINT=/api/auth/google/login
+          EOF
+
+      - name: Deploy to EC2
+        run: |
+          # Create app directory if it doesn't exist
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "mkdir -p /home/${{ secrets.EC2_USER }}/task-management-app"
+
+          # Transfer application files
+          rsync -avz --exclude 'node_modules' --exclude '.git' --exclude '.github' \
+            ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/task-management-app/
+
+          # Deploy the application
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            cd /home/${{ secrets.EC2_USER }}/task-management-app
+            
+            # Make app.sh executable
+            chmod +x app.sh
+            
+            # Stop any running containers
+            ./app.sh down
+            
+            # Build all images
+            docker-compose -f ./backend/docker-compose.yml build --no-cache
+            docker-compose -f ./frontend/docker-compose.yml build --no-cache
+            
+            # Start the application in detached mode
+            ./app.sh deploy -d
+            
+            # Print container status
+            docker ps
+          EOF

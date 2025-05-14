@@ -10,14 +10,13 @@ from app.routes import (
     chatbot_routes,
 )
 from app.db.database import Base, engine
+from app.config import settings
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="FastAPI Note Management", version="1.0.0")
 
-origins = [
-    "http://localhost:5173",
-]
+origins = settings.ALLOWED_ORIGINS.split(",") if settings.ALLOWED_ORIGINS else ["*"]
 
 app.add_middleware(
     CORSMiddleware,

@@ -44,6 +44,7 @@ class Setting(BaseSettings):
 
     OPENAI_API_KEY: str
     MAX_ALLOWED_TOKENS: int = 400
+    ALLOWED_ORIGINS: str = "http://localhost:5173"
 
     @property
     def DATABASE_URL(self) -> str:
