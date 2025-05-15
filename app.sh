@@ -2,7 +2,9 @@
 
 # Define file paths for the relocated Docker Compose files
 BACKEND_COMPOSE="./backend/docker-compose.yml"
+BACKEND_OVERRIDE="./backend/docker-compose.override.yml"
 FRONTEND_COMPOSE="./frontend/docker-compose.yml"
+FRONTEND_OVERRIDE="./frontend/docker-compose.override.yml"
 
 # Display help information
 function show_help {
@@ -25,23 +27,20 @@ function show_help {
 case "$1" in
   deploy)
     echo "Stopping any existing containers..."
-    docker-compose -f $BACKEND_COMPOSE -f $FRONTEND_COMPOSE down
-    
-    echo "Rebuilding frontend image to include latest changes..."
-    docker-compose -f $FRONTEND_COMPOSE up --no-cache frontend
-    
+    docker-compose -f $BACKEND_COMPOSE -f $BACKEND_OVERRIDE -f $FRONTEND_COMPOSE -f $FRONTEND_OVERRIDE down
+
     echo "Starting backend services first..."
-    docker-compose -f $BACKEND_COMPOSE up -d
-    
+    docker-compose -f $BACKEND_COMPOSE -f $BACKEND_OVERRIDE up -d
+
     echo "Waiting for backend to initialize (5 seconds)..."
     sleep 5
-    
+
     echo "Starting frontend services..."
-    docker-compose -f $FRONTEND_COMPOSE up ${@:2}
+    docker-compose -f $FRONTEND_COMPOSE -f $FRONTEND_OVERRIDE up ${@:2}
     ;;
   down)
     echo "Stopping all containers..."
-    docker-compose -f $BACKEND_COMPOSE -f $FRONTEND_COMPOSE down ${@:2}
+    docker-compose -f $BACKEND_COMPOSE -f $BACKEND_OVERRIDE -f $FRONTEND_COMPOSE -f $FRONTEND_OVERRIDE down ${@:2}
     ;;
   backend)
     echo "Starting only backend services..."
@@ -53,9 +52,9 @@ case "$1" in
     ;;
   logs)
     if [ -z "$2" ]; then
-      docker-compose -f $BACKEND_COMPOSE -f $FRONTEND_COMPOSE logs -f
+      docker-compose -f $BACKEND_COMPOSE -f $BACKEND_OVERRIDE -f $FRONTEND_COMPOSE -f $FRONTEND_OVERRIDE logs -f
     else
-      docker-compose -f $BACKEND_COMPOSE -f $FRONTEND_COMPOSE logs -f "$2"
+      docker-compose -f $BACKEND_COMPOSE -f $BACKEND_OVERRIDE -f $FRONTEND_COMPOSE -f $FRONTEND_OVERRIDE logs -f "$2"
     fi
     ;;
   build)
