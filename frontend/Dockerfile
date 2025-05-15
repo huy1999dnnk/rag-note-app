@@ -13,6 +13,9 @@ RUN npm install
 # Copy all source code
 COPY ./ ./
 
+# Set NODE_OPTIONS before running the build
+ENV NODE_OPTIONS=--max-old-space-size=4096
+
 # Build the production version of the app
 RUN npm run build -- --mode production
 
