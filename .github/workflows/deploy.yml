@@ -120,21 +120,21 @@ jobs:
             cd /home/${{ secrets.EC2_USER }}/task-management-app
 
             cat > backend/docker-compose.override.yml <<EOL
-            version: \"3.8\"
-            services:
+          version: "3.8"
+          services:
             app:
-              image: \"${DOCKER_USERNAME}/note-app:backend-${SHA_SHORT}\"
+              image: "${DOCKER_USERNAME}/note-app:backend-${SHA_SHORT}"
               pull_policy: always
             celery_worker:
-              image: \"${DOCKER_USERNAME}/note-app:backend-${SHA_SHORT}\"
+              image: "${DOCKER_USERNAME}/note-app:backend-${SHA_SHORT}"
               pull_policy: always
           EOL
 
             cat > frontend/docker-compose.override.yml <<EOL
-          version: \"3.8\"
+          version: "3.8"
           services:
             frontend:
-              image: \"${DOCKER_USERNAME}/note-app:frontend-${SHA_SHORT}\"
+              image: "${DOCKER_USERNAME}/note-app:frontend-${SHA_SHORT}"
               pull_policy: always
           EOL
           '"
@@ -160,7 +160,7 @@ jobs:
             # Login to Docker Hub (to pull private images if needed)
             echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
 
-            
+
 
             # Stop any running containers
             ./app.sh down
