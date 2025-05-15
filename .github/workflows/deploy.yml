@@ -116,28 +116,32 @@ jobs:
             ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/task-management-app/
 
           # Create docker-compose override files on EC2 with correct variable interpolation
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} bash -c "'
-            cd /home/${{ secrets.EC2_USER }}/task-management-app
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} bash -c "
+          cd /home/${{ secrets.EC2_USER }}/task-management-app
+          mkdir -p backend frontend
 
-            cat > backend/docker-compose.override.yml <<EOL
-          version: "3.8"
+          cat > backend/docker-compose.override.yml <<EOL
+          version: \"3.8\"
           services:
             app:
-              image: "${DOCKER_USERNAME}/note-app:backend-${SHA_SHORT}"
+              image: \"${DOCKER_USERNAME}/note-app:backend-${SHA_SHORT}\"
               pull_policy: always
             celery_worker:
-              image: "${DOCKER_USERNAME}/note-app:backend-${SHA_SHORT}"
+              image: \"${DOCKER_USERNAME}/note-app:backend-${SHA_SHORT}\"
               pull_policy: always
           EOL
 
-            cat > frontend/docker-compose.override.yml <<EOL
-          version: "3.8"
+          cat > frontend/docker-compose.override.yml <<EOL
+          version: \"3.8\"
           services:
             frontend:
-              image: "${DOCKER_USERNAME}/note-app:frontend-${SHA_SHORT}"
+              image: \"${DOCKER_USERNAME}/note-app:frontend-${SHA_SHORT}\"
               pull_policy: always
           EOL
           '"
+
+          export DOCKER_USERNAME=\"${DOCKER_USERNAME}\"
+          export DOCKER_PASSWORD=\"${DOCKER_PASSWORD}\"
 
           # Deploy on EC2
           ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} <<'EOF'
