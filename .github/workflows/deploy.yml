@@ -160,6 +160,8 @@ jobs:
             # Login to Docker Hub (to pull private images if needed)
             echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
 
+            
+
             # Stop any running containers
             ./app.sh down
 

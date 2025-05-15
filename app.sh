@@ -26,6 +26,9 @@ function show_help {
 
 case "$1" in
   deploy)
+    echo "Ensuring Docker network exists..."
+    docker network create --driver bridge task-management-network || true
+
     echo "Stopping any existing containers..."
     docker-compose -f $BACKEND_COMPOSE -f $BACKEND_OVERRIDE -f $FRONTEND_COMPOSE -f $FRONTEND_OVERRIDE down
 
