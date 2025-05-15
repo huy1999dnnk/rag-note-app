@@ -1,7 +1,6 @@
 // axiosInstance.ts
 import axios, { AxiosError, type AxiosRequestConfig } from 'axios';
 const baseURL = import.meta.env.VITE_API_V1_URL;
-console.log('baseURL', baseURL);
 let isRefreshing = false;
 let failedQueue: any[] = [];
 
