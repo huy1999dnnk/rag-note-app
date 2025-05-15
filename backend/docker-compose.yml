@@ -70,6 +70,7 @@ services:
 
 networks:
   backend:
+    external: true
     name: task-management-network
 
 volumes:
