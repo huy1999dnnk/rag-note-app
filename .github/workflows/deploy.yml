@@ -94,12 +94,15 @@ jobs:
           ssh-keyscan ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to EC2
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          SHA_SHORT: ${{ steps.meta.outputs.sha_short }}
         run: |
           # Create deployment directory on EC2
           ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "mkdir -p /home/${{ secrets.EC2_USER }}/task-management-app"
 
-           # Transfer *only* necessary files (no source code needed since we're using pre-built images)
-            rsync -avz \
+          # Transfer only necessary files
+          rsync -avz \
             --exclude 'node_modules' --exclude '.git' --exclude '.github' \
             --include='backend/' \
             --include='backend/.env' \
@@ -112,65 +115,61 @@ jobs:
             --exclude='*' \
             ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/task-management-app/
 
-          # Create docker-compose override file on EC2 to use pre-built images
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << EOF
+          # Create docker-compose override files on EC2 with correct variable interpolation
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} bash -c "'
             cd /home/${{ secrets.EC2_USER }}/task-management-app
 
-            mkdir -p backend frontend
-            
-            # Create docker-compose.override.yml for backend
-            cat > backend/docker-compose.override.yml << 'EOL'
-            version: "3.8"
+            cat > backend/docker-compose.override.yml <<EOL
+            version: \"3.8\"
             services:
-              app:
-                image: ${{ secrets.DOCKER_USERNAME }}/note-app:backend-${{ steps.meta.outputs.sha_short }}
-                pull_policy: always
-              celery_worker:
-                image: ${{ secrets.DOCKER_USERNAME }}/note-app:backend-${{ steps.meta.outputs.sha_short }}
-                pull_policy: always
-            EOL
-            
-            # Create docker-compose.override.yml for frontend
-            cat > frontend/docker-compose.override.yml << 'EOL'
-            version: "3.8"
-            services:
-              frontend:
-                image: ${{ secrets.DOCKER_USERNAME }}/note-app:frontend-${{ steps.meta.outputs.sha_short }}
-                pull_policy: always
-            EOL
-          EOF
+            app:
+              image: \"${DOCKER_USERNAME}/note-app:backend-${SHA_SHORT}\"
+              pull_policy: always
+            celery_worker:
+              image: \"${DOCKER_USERNAME}/note-app:backend-${SHA_SHORT}\"
+              pull_policy: always
+          EOL
+
+            cat > frontend/docker-compose.override.yml <<EOL
+          version: \"3.8\"
+          services:
+            frontend:
+              image: \"${DOCKER_USERNAME}/note-app:frontend-${SHA_SHORT}\"
+              pull_policy: always
+          EOL
+          '"
 
           # Deploy on EC2
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            cd /home/${{ secrets.EC2_USER }}/task-management-app
-            
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} <<'EOF'
+            cd /home/${USER}/task-management-app
+
             # Make app.sh executable
             chmod +x app.sh
-            
+
             # Set up SSL certificates
             echo "Setting up SSL certificates..."
             sudo mkdir -p /etc/ssl/private /etc/ssl/certs
             sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
               -keyout /etc/ssl/private/nginx-selfsigned.key \
               -out /etc/ssl/certs/nginx-selfsigned.crt \
-              -subj "/CN=${{ secrets.EC2_HOST }}"
-            
+              -subj "/CN=${EC2_HOST}"
+
             # Clean up old Docker resources
             docker system prune -af
-            
+
             # Login to Docker Hub (to pull private images if needed)
-            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-            
+            echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+
             # Stop any running containers
             ./app.sh down
-            
+
             # Pull and start containers using the pre-built images
             docker-compose -f ./backend/docker-compose.yml -f ./backend/docker-compose.override.yml pull
             docker-compose -f ./frontend/docker-compose.yml -f ./frontend/docker-compose.override.yml pull
-            
+
             # Start the application in detached mode
             ./app.sh deploy -d
-            
+
             # Print container status
             docker ps
           EOF
