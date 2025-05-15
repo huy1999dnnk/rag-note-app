@@ -110,6 +110,8 @@ jobs:
           # Create docker-compose override file on EC2 to use pre-built images
           ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << EOF
             cd /home/${{ secrets.EC2_USER }}/task-management-app
+
+            mkdir -p backend frontend
             
             # Create docker-compose.override.yml for backend
             cat > backend/docker-compose.override.yml << 'EOL'
