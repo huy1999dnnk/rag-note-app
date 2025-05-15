@@ -28,7 +28,7 @@ case "$1" in
     docker-compose -f $BACKEND_COMPOSE -f $FRONTEND_COMPOSE down
     
     echo "Rebuilding frontend image to include latest changes..."
-    docker-compose -f $FRONTEND_COMPOSE build --no-cache frontend
+    docker-compose -f $FRONTEND_COMPOSE up --no-cache frontend
     
     echo "Starting backend services first..."
     docker-compose -f $BACKEND_COMPOSE up -d
@@ -59,8 +59,7 @@ case "$1" in
     fi
     ;;
   build)
-    echo "Rebuilding Docker images..."
-    docker-compose -f $BACKEND_COMPOSE -f $FRONTEND_COMPOSE build ${@:2}
+    echo "Build is disabled on EC2. Use GitHub Actions to build and push images."
     ;;
   dev)
     echo "Starting backend services in Docker..."
