@@ -98,12 +98,15 @@ jobs:
           # Create deployment directory on EC2
           ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "mkdir -p /home/${{ secrets.EC2_USER }}/task-management-app"
 
-          # Transfer *only* necessary files (no source code needed since we're using pre-built images)
+           # Transfer *only* necessary files (no source code needed since we're using pre-built images)
           rsync -avz \
             --exclude 'node_modules' --exclude '.git' --exclude '.github' \
-            --include='backend/.env' --include='frontend/.env.production' \
-            --include='app.sh' --include='frontend/nginx.conf' \
-            --include='backend/docker-compose.yml' --include='frontend/docker-compose.yml' \
+            --include='backend/.env' \
+            --include='frontend/.env.production' \
+            --include='app.sh' \
+            --include='frontend/nginx.conf' \
+            --include='backend/docker-compose.yml' \ # Ensure this is included
+            --include='frontend/docker-compose.yml' \ # Ensure this is included
             --exclude='*' \
             ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/task-management-app/
 
