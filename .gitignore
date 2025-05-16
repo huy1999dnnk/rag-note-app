@@ -69,11 +69,3 @@ logs/
 
 # AWS
 .aws/
-
-# ML/AI models and datasets
-*.h5
-*.pkl
-models/
-datasets/
-vectors/
-embeddings/
