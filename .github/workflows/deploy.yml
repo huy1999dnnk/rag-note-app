@@ -66,7 +66,7 @@ jobs:
           GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_REDIRECT_URI=${{ secrets.GOOGLE_REDIRECT_URI }}
 
-          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
 
           PASSWORD_RESET_CODE_EXPIRE_MINUTES=60
           OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}

@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile # Referencing the Dockerfile in frontend folder
+    env_file:
+      - .env.production
     container_name: react-frontend
     ports:
       - '5173:80' # Nginx exposes the app on port 5173

@@ -5,6 +5,8 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
+    env_file:
+      - .env
     dns:
       - 8.8.8.8 # Google's public DNS
     container_name: fastapi-app
@@ -23,6 +25,8 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
+    env_file:
+      - .env
     container_name: celery-worker
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
