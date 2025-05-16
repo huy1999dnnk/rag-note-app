@@ -11,6 +11,12 @@ from app.routes import (
 )
 from app.db.database import Base, engine
 from app.config import settings
+from sqlalchemy import text
+
+# Create pgvector extension if it doesn't exist
+with engine.connect() as conn:
+    conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+    conn.commit()
 
 Base.metadata.create_all(bind=engine)
 
