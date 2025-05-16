@@ -71,6 +71,7 @@ jobs:
           PASSWORD_RESET_CODE_EXPIRE_MINUTES=60
           OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
           FRONTEND_URL_DEV=${{ secrets.FRONTEND_URL_DEV }}
+          EMAIL_SENDER=${{ secrets.EMAIL_SENDER }}
 
           ALLOWED_ORIGINS=${{ secrets.ALLOWED_ORIGINS }}
           EOF
