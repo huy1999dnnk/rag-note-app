@@ -9,6 +9,8 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
+ENV PYTHONPATH=/app
+
 # Install system dependencies for psycopg2 and build tools
 RUN apk update && apk add --no-cache \
     gcc \
