@@ -1,7 +1,6 @@
 import api from '@/lib/axios';
 import { IUpdateUserProfile } from '@/types/user';
 export const getProfile = async () => {
-  console.log('getProfile', api);
   const res = await api.post('/user/profile');
   return res.data;
 };

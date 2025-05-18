@@ -1,9 +1,6 @@
 // axiosInstance.ts
 import axios, { AxiosError, type AxiosRequestConfig } from 'axios';
 const baseURL = import.meta.env.VITE_API_V1_URL;
-console.log('baseURL', baseURL);
-console.log('VITE_API_BASE_URL', import.meta.env.VITE_API_BASE_URL);
-console.log('VITE_GOOGLE_AUTH_ENDPOINT', import.meta.env.VITE_GOOGLE_AUTH_ENDPOINT);
 let isRefreshing = false;
 let failedQueue: any[] = [];
 
