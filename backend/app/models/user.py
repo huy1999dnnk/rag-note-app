@@ -13,6 +13,7 @@ class User(Base):
     hashed_password = Column(String, nullable=True)
     is_active = Column(Integer, default=1)
     image = Column(String, nullable=True)
+    address = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
