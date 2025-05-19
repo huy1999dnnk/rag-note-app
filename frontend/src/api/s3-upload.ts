@@ -56,7 +56,7 @@ export const uploadFile = async (file: File, noteId: string): Promise<string> =>
           objectKey,
           noteId,
         })
-        .catch((err) => console.log('PDF processing request failed', err));
+        .catch((err) => console.log('PDF upload processing request failed', err));
     } catch (error) {
       // Just log the error but don't interrupt the flow
       console.error('Error requesting PDF processing:', error);
