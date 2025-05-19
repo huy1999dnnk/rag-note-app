@@ -105,6 +105,8 @@ jobs:
           rsync -avz \
             --exclude 'node_modules' --exclude '.git' --exclude '.github' \
             --include='backend/' \
+            --include='backend/alembic/' \
+            --include='backend/alembic/***' \
             --include='backend/.env' \
             --include='backend/docker-compose.yml' \
             --include='frontend/' \
