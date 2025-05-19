@@ -3,6 +3,7 @@
 # Define file paths for the relocated Docker Compose files
 BACKEND_COMPOSE="./backend/docker-compose.yml"
 BACKEND_OVERRIDE="./backend/docker-compose.override.yml"
+BACKEND_DEV_COMPOSE="./backend/docker-compose.dev.yml"
 FRONTEND_COMPOSE="./frontend/docker-compose.yml"
 FRONTEND_OVERRIDE="./frontend/docker-compose.override.yml"
 
@@ -64,10 +65,15 @@ case "$1" in
     echo "Build is disabled on EC2. Use GitHub Actions to build and push images."
     ;;
   dev)
-    echo "Starting backend services in Docker..."
-    docker-compose -f $BACKEND_COMPOSE up -d
+    echo "Starting backend services in Docker with hot reloading enabled..."
+    docker-compose -f $BACKEND_COMPOSE -f $BACKEND_DEV_COMPOSE up -d
+    
     echo "Starting frontend development server locally with development env..."
     cd frontend && npm run dev -- --mode development
+    ;;
+  dev-down)
+    echo "Stopping development containers..."
+    docker-compose -f $BACKEND_COMPOSE -f $BACKEND_DEV_COMPOSE down
     ;;
   *)
     show_help

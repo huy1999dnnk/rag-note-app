@@ -54,6 +54,11 @@ export default function ProfileForm() {
           type: 'server',
           message: 'Current password is incorrect',
         });
+      } else if (error.response?.data.detail === 'Username already exists') {
+        form.setError('username', {
+          type: 'server',
+          message: 'Username already exists, please choose another one',
+        });
       } else {
         toast.error('Failed to update profile. Please try again.');
       }

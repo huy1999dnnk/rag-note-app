@@ -16,6 +16,19 @@ class UserService:
         if data.username is None:
             current_user.username = ""
         else:
+            username_exists = (
+                db.query(User)
+                .filter(
+                    User.username == data.username,
+                    User.id != current_user.id,
+                )
+                .first()
+            )
+            if username_exists:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Username already exists",
+                )
             current_user.username = data.username
 
         if (

@@ -41,7 +41,7 @@ class RAGChatbotService:
             messages_for_streams.append(
                 SystemMessage(
                     content=(
-                        "You are a helpful assistant for a note-taking app. Answer questions or summarize notes based on the provided context\n"
+                        "You are a helpful assistant for a note-taking app. Answer questions based on the provided context\n"
                         "If the answer isn’t in the context, use your own knowledge, but keep replies short and relevant.\n"
                         "After answering, suggest follow-up questions and ask if the user wants to know more."
                     )
@@ -60,36 +60,29 @@ class RAGChatbotService:
             question = self.openAiClient.detect_if_we_need_to_search_in_vector_db(
                 messages_for_streams, user_message
             )
-            if question != "No":
-                chunks = vs.search_similar_chunks(question, db, top_k)
 
+            question = json.loads(question)
+            if question["type"] == "general":
+                prompt = user_message
+            elif question["type"] == "search":
+                chunks = vs.search_similar_chunks(question["query"], db, top_k)
                 context = "\n\n".join(chunks)
                 prompt = f"data you might need from database:\n{context}\n\n Use the history chat and data to answer this question: {user_message}"
-            else:
-                prompt = user_message
+            elif question["type"] == "summarize_note":
+                note_id = question["query"]
+                notes = db.query(Note).filter(Note.id == note_id).all()
 
-            # if intent == "summarize_note":
-            #     if not note_ids or len(note_ids) == 0:
-            #         yield f"data: {json.dumps({'answer': 'Please specify which note to summarize.', 'done': True})}\n\n"
-            #         return
-            #     notes = db.query(Note).filter(Note.id.in_(note_ids)).all()
-            #     if not notes:
-            #         yield f"data: {json.dumps({'answer': 'Note not found.', 'done': True})}\n\n"
-            #         return
-            #     context = self.get_text_content_from_note(notes, vs)
-            #     prompt = f"Summarize the following note(s):\n{context}"
-            # elif intent == "summarize_all_notes":
-            #     notes = db.query(Note).filter(Note.user_id == user_id).all()
-            #     if not notes:
-            #         yield f"data: {json.dumps({'answer': 'You have no notes to summarize.', 'done': True})}\n\n"
-            #         return
-            #     context = self.get_text_content_from_note(notes, vs)
-            #     prompt = f"Summarize all these notes:\n{context}"
-            # elif intent.startswith("delete_note"):
-            #     note_id = intent.split("+")[1]
-            #     yield f"data: {json.dumps({'answer': f'I will delete the note with id {note_id}', 'done': True})}\n\n"
-            #     return
-            # else:
+                if not notes:
+                    prompt = f"Note with id {note_id} not found. Anwser the question: {user_message}"
+                else:
+                    context = self.get_text_content_from_note(notes, vs)
+                    if not context:
+                        prompt = f"Note with id {note_id} content is not summarize. Anwser the question: {user_message}"
+                    else:
+                        prompt = f"Summarize the following note:\n{context}\n\nUse the history chat and data to answer this question: {user_message}"
+            elif question["type"] == "support_later":
+                prompt = f"The action user require will be support in the future. Answer this question: {user_message}"
+
             messages_for_streams.append(HumanMessage(content=prompt))
 
             if self.openAiClient.count_tokens_in_messages(messages_for_streams) > 500:

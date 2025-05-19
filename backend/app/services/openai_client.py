@@ -66,11 +66,12 @@ class OpenAiClient:
         openai_messages = self.serialize_langchain_messages(messages_for_streams_params)
 
         system_prompt = (
-            f"You are a helpful assistant for a note-taking app. Decide if the latest user message requires vector DB search using user message and chat history: {openai_messages}\n"
-            "If it can be answered from your own knowledge, return 'No'.\n"
-            "Otherwise, return the keyword or phrase to search.\n"
-            "Example: User: 'Do you know Adam?', Assistant: 'No', User: 'Try again' → return 'Adam'.\n"
-            "Respond with only the keyword, phrase, or 'No'."
+            f"You are an agent for an agentic RAG system for a note-taking app. Your task is to analyze the chat history and the latest user message to determine the appropriate action. Here is the chat history {openai_messages}. Return a JSON-only response with the following structure:\n"
+            """For general questions, return: {"type": "general"}\n"""
+            """If you cant extracts enough data for query based on chat history and user message return {"type": "general"}."""
+            """If user ask something you dont know, request to search in vector database, return: {"type": "search", "query": "<Keyword for searching in vector database extract from chat history and latest user message>"}\n"""
+            """If user ask to summarize a note, extract note_id from chat history or user message, only return {"type": "summarize_note", "query": "<note_id extract from chat history and user message>"} if note_id is valid\n"""
+            """Output only valid JSON, extract relevant data (e.g., note ID) from chat history or the latest message. If no specific action is identified, default to {"type": "general"}.\n"""
         )
 
         messages = [
