@@ -176,6 +176,26 @@ jobs:
             # Start the application in detached mode
             ./app.sh deploy -d
 
+             # Wait for containers to initialize
+            echo "Waiting for backend to be ready..."
+            sleep 15
+
+            # Run Alembic migrations in the backend container
+            echo "Running Alembic migrations..."
+            if docker ps | grep -q fastapi-app; then
+              docker exec fastapi-app alembic upgrade head
+              if [ $? -eq 0 ]; then
+                echo "✅ Database migrations completed successfully"
+              else
+                echo "❌ Database migrations failed"
+                exit 1
+              fi
+            else
+              echo "❌ Backend container 'fastapi-app' not found!"
+              docker ps
+              exit 1
+            fi
+
             # Print container status
             docker ps
           EOF
