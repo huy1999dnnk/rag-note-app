@@ -1,7 +1,7 @@
 import axios from 'axios';
 import api from '@/lib/axios';
 import { toast } from 'sonner';
-import { ALLOWED_TYPES } from '@/constants/s3';
+import { ALLOWED_TYPES, MAX_FILE_SIZE, MAX_FILE_SIZE_ERROR_MESSAGE } from '@/constants/s3';
 // Resolves an S3 object key to a presigned URL for display
 export const resolveImageUrl = async (imageKey: string): Promise<string> => {
   const response = await api.get(`/upload/get-image-url?key=${encodeURIComponent(imageKey)}`);
@@ -10,9 +10,9 @@ export const resolveImageUrl = async (imageKey: string): Promise<string> => {
 
 // Uploads a file to S3 and returns a presigned URL for immediate display
 export const uploadFile = async (file: File, noteId: string): Promise<string> => {
-  if (file.size > 10 * 1024 * 1024) {
-    toast.error('File must be under 10MB.');
-    throw new Error('File must be under 10MB.');
+  if (file.size > MAX_FILE_SIZE) {
+    toast.error(MAX_FILE_SIZE_ERROR_MESSAGE);
+    throw new Error(MAX_FILE_SIZE_ERROR_MESSAGE);
   }
 
   if (!ALLOWED_TYPES.includes(file.type)) {
@@ -67,9 +67,9 @@ export const uploadFile = async (file: File, noteId: string): Promise<string> =>
 };
 
 export const getObjectKeyFileUpload = async (file: File): Promise<string> => {
-  if (file.size > 10 * 1024 * 1024) {
-    toast.error('File must be under 10MB.');
-    throw new Error('File must be under 10MB.');
+  if (file.size > MAX_FILE_SIZE) {
+    toast.error(MAX_FILE_SIZE_ERROR_MESSAGE);
+    throw new Error(MAX_FILE_SIZE_ERROR_MESSAGE);
   }
 
   if (!ALLOWED_TYPES.includes(file.type)) {
