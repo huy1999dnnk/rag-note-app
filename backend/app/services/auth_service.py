@@ -110,7 +110,7 @@ def request_password_reset(email: str, db: Session):
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
+            detail="Email not found",
         )
 
     reset_code = generate_reset_code()
