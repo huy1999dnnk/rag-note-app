@@ -67,11 +67,12 @@ class OpenAiClient:
 
         system_prompt = (
             f"You are an agent for an agentic RAG system for a note-taking app. Your task is to analyze the chat history and the latest user message to determine the appropriate action. Here is the chat history {openai_messages}. Return a JSON-only response with the following structure:\n"
-            """For general questions, return: {"type": "general"}\n"""
-            """If you cant extracts enough data for query based on chat history and user message return {"type": "general"}."""
-            """If user ask something you dont know, request to search in vector database, return: {"type": "search", "query": "<Keyword for searching in vector database extract from chat history and latest user message>"}\n"""
-            """If user ask to summarize a note, extract note_id from chat history or user message, only return {"type": "summarize_note", "query": "<note_id extract from chat history and user message>"} if note_id is valid\n"""
-            """Output only valid JSON, extract relevant data (e.g., note ID) from chat history or the latest message. If no specific action is identified, default to {"type": "general"}.\n"""
+            """For general questions if you think you can answer it with your knowledge, return: {"type": "general"}\n"""
+            """If user want to execute an action, but you cannot extract enough information for that action from the chat history, return: {"type": "general"}\n"""
+            """If user ask something you dont know, please refer request to search in vector database, return: {"type": "search", "query": "<Keyword for searching in vector database>"}\n"""
+            """If user ask to summarize a note, only return {"type": "summarize_note", "query": "<note_id (not null)>"}\n"""
+            """If user ask to summarize all notes, return {"type": "summarize_all_notes"}\n"""
+            """Output only valid JSON. If no specific action is identified, default to {"type": "general"}.\n"""
         )
 
         messages = [
@@ -139,7 +140,7 @@ class OpenAiClient:
             chat = ChatOpenAI(
                 openai_api_key=settings.OPENAI_API_KEY,
                 streaming=True,
-                model="gpt-4.1-nano",  # Or gpt-3.5-turbo for a more economical option
+                model="gpt-4.1-nano",  # Or gpt-3.5-turbo for a more economical option,
             )
 
             # Initialize an empty answer
