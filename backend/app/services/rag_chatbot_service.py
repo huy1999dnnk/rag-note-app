@@ -41,7 +41,7 @@ class RAGChatbotService:
             messages_for_streams.append(
                 SystemMessage(
                     content=(
-                        "You are a helpful assistant for a note-taking app. Answer questions based on the provided context\n"
+                        "You are a helpful assistant for a note-taking app. Answer questions based on the provided context or collect necessary information from user to execute some action based on chat history.\n"
                         "If the answer isn’t in the context, use your own knowledge, but keep replies short and relevant.\n"
                         "After answering, suggest follow-up questions and ask if the user wants to know more."
                     )
@@ -80,6 +80,16 @@ class RAGChatbotService:
                         prompt = f"Note with id {note_id} content is not summarize. Anwser the question: {user_message}"
                     else:
                         prompt = f"Summarize the following note:\n{context}\n\nUse the history chat and data to answer this question: {user_message}"
+            elif question["type"] == "summarize_all_notes":
+                notes = db.query(Note).filter(Note.user_id == user_id).all()
+                if not notes:
+                    prompt = f"User with id {user_id} has no notes. Anwser the question: {user_message}"
+                else:
+                    context = self.get_text_content_from_note(notes, vs)
+                    if not context:
+                        prompt = f"User with id {user_id} has no notes to summarize. Anwser the question: {user_message}"
+                    else:
+                        prompt = f"Summarize all notes:\n{context}\n\nUse the history chat and data to answer this question: {user_message}"
             elif question["type"] == "support_later":
                 prompt = f"The action user require will be support in the future. Answer this question: {user_message}"
 
